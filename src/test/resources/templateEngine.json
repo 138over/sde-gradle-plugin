@@ -1,0 +1,93 @@
+{
+  "docker" : {
+    "from": "ubuntu:16.04"
+  },
+  "jenkins": {
+    "authorization": {
+      "alice": "admin",
+      "ted": "builder",
+      "bob": "updater"
+    },
+    "roles": {
+      "admin": [
+        {
+          "model": "hudson.model.Item",
+          "value": "Build"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Cancel"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Configure"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Discover"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Read"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Workspace"
+        },
+        {
+          "model": "hudson.model.Run",
+          "value": "Update"
+        }
+      ],
+      "builder": [
+        {
+          "model": "hudson.model.Item",
+          "value": "Build"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Cancel"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Read"
+        },
+        {
+          "model": "hudson.model.Item",
+          "value": "Workspace"
+        },
+        {
+          "model": "hudson.model.Run",
+          "value": "Update"
+        }
+      ],
+      "updater": [
+        {
+          "model": "hudson.model.Run",
+          "value": "Update"
+        }
+      ],
+      "anonymous": [
+        {
+          "model": "hudson.model.Item",
+          "value": "Read"
+        }
+      ]
+    },
+    "assignedNode": "linux-slave",
+    "parameters": {
+      "GIT_TAG": {
+        "value": "",
+        "desc": "checkout from git tag"
+      }
+    },
+    "builder": {
+      "command": "gradle dev-pipeline -Pgit_tag=$GIT_TAG -Pworkspace=$WORKSPACE -Pbuild_number=$BUILD_NUMBER"
+    },
+    "notification": {
+      "email": ["foo@one38over.com", "bar@one38over.com"]
+    },
+    "artifacts": ["artifacts/*"],
+    "descriptionSetter": "GIT_TAG=(.*)"
+  }
+}

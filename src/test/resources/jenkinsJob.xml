@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <hudson.security.AuthorizationMatrixProperty><span th:each="user : ${authorization}" th:remove="tag">
+            <permission th:each="perm : ${roles['__${user.value}__']}" th:text="${perm.model + '.' + perm.value + ':' + user.key}"></permission></span>
+        </hudson.security.AuthorizationMatrixProperty>
+        <hudson.model.ParametersDefinitionProperty>
+            <parameterDefinitions>
+                <hudson.model.StringParameterDefinition th:each="entry : ${parameters}">
+                    <name th:text="${entry.key}"></name>
+                    <description th:text="${entry.value.desc}"></description>
+                    <defaultValue th:text="${entry.value.value}"></defaultValue>
+                </hudson.model.StringParameterDefinition>
+            </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.9.0">
+            <maxConcurrentPerNode>0</maxConcurrentPerNode>
+            <maxConcurrentTotal>0</maxConcurrentTotal>
+            <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+            <throttleEnabled>false</throttleEnabled>
+            <throttleOption>project</throttleOption>
+            <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+            <paramsToUseForLimit/>
+        </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+    </properties>
+    <scm class="hudson.scm.NullSCM"/>
+    <assignedNode th:text="${assignedNode}"></assignedNode>
+    <canRoam>false</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command th:text="${builder.command}"></command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers>
+        <hudson.tasks.ArtifactArchiver>
+            <artifacts th:text="${#strings.listJoin(artifacts, ',')}"></artifacts>
+            <allowEmptyArchive>false</allowEmptyArchive>
+            <onlyIfSuccessful>false</onlyIfSuccessful>
+            <fingerprint>false</fingerprint>
+            <defaultExcludes>true</defaultExcludes>
+            <caseSensitive>true</caseSensitive>
+        </hudson.tasks.ArtifactArchiver>
+        <hudson.tasks.Mailer plugin="mailer@1.17">
+            <recipients th:text="${#strings.listJoin(notification.email, ' ')}"></recipients>
+            <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+            <sendToIndividuals>false</sendToIndividuals>
+        </hudson.tasks.Mailer>
+        <hudson.plugins.descriptionsetter.DescriptionSetterPublisher plugin="description-setter@1.10">
+            <regexp th:text="${descriptionSetter}"></regexp>
+            <regexpForFailed/>
+            <setForMatrix>false</setForMatrix>
+        </hudson.plugins.descriptionsetter.DescriptionSetterPublisher>
+    </publishers>
+    <buildWrappers>
+        <org.jenkinsci.plugins.builduser.BuildUser plugin="build-user-vars-plugin@1.5"/>
+    </buildWrappers>
+</project>
