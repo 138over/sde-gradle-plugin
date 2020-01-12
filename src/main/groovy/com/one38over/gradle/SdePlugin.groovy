@@ -1,8 +1,11 @@
 package com.one38over.gradle
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.GradleException
+
 
 class SdePlugin implements Plugin<Project> {
 
@@ -11,16 +14,19 @@ class SdePlugin implements Plugin<Project> {
     }
 
     void apply(Project project) {
-        File file = new File('sde.json')
-        printf("SDE Config File Plugin %s %s\n", project.rootDir, file.absolutePath)
-        Map configuration = readJsonTaskConfiguration(new File(project.rootDir, 'sde.json'))
+        Map config = readJsonTaskConfiguration(new File(project.rootDir, 'sde.json'))
 
-        configuration.sde.each { taskName,taskConfig ->
-            project.tasks.register(taskName, ShellExecTask.class) {
-                group = taskConfig.group
-                description = taskConfig.description
-                dependsOn = taskConfig.dependsOn
-                config = taskConfig.config
+        //println JsonOutput.prettyPrint(JsonOutput.toJson(config))
+
+        TaskHandler taskHandler = new TaskHandler(project)
+
+        config.sde.each { String componentName, Map componentConfiguration ->
+            componentConfiguration.task.each { String taskName, Map taskConfiguration ->
+                try {
+                    taskHandler.assign(componentName, taskName, taskConfiguration)
+                } catch (GradleException e) {
+                    throw new GradleException("SdePlugin: ${e.message}")
+                }
             }
         }
     }

@@ -1,23 +1,61 @@
 {
     "sde": {
-        "A": {
-            "group": "ShellExecTask",
-            "description": "dynamic task generation",
-            "dependsOn": ["B"],
-            "config": {
-                "workingDir": "/tmp",
-                "environment": { "SDE_HOME": "/tmp/sde" },
-                "command": "sde A ..."
-            }
-        },
-        "B": {
-            "group": "ShellExecTask",
-            "description": "dynamic task generation",
-            "dependsOn": [],
-            "config": {
-                "workingDir": "/tmp",
-                "environment": { "SDE_HOME": "/tmp/sde" },
-                "command": "sde B ..."
+        "foo": {
+            "task": {
+                "A": {
+                    "group": "Shell Exec",
+                    "description": "dynamic task generation",
+                    "unorderedDeps": ["foo-B"],
+                    "config": {
+                        "handler": "ShellExecTask",
+                        "workdir": "/tmp/A",
+                        "environment": { "SDE_HOME": "/tmp/sde/A" },
+                        "command": "sde A ..."
+                    }
+                },
+                "B": {
+                    "group": "Shell Exec",
+                    "description": "dynamic task generation",
+                    "unorderedDeps": [],
+                    "config": {
+                        "handler": "ShellExecTask",
+                        "workdir": "/tmp/B",
+                        "environment": { "SDE_HOME": "/tmp/sde/B" },
+                        "command": "sde B ..."
+                    }
+                },
+                "C": {
+                    "group": "Download Files",
+                    "description": "dynamic task generation",
+                    "unorderedDeps": [],
+                    "config": {
+                        "handler": "DownloadFileTask",
+                        "src": "https://github.com/etcd-io/etcd/releases/download/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz",
+                        "dest": "cache/etcd-v3.4.0-linux-amd64.tar.gz"
+                    }
+                },
+                "D": {
+                    "group": "Copy Files",
+                    "description": "dynamic task generation",
+                    "unorderedDeps": [],
+                    "config": {
+                        "handler": "CopyFileTask",
+                        "src": "build.gradle",
+                        "destdir": "build/proto",
+                        "environment": { "foo": "bar" }
+                    }
+                },
+                "E": {
+                    "group": "Sync File",
+                    "description": "dynamic task generation",
+                    "unorderedDeps": [],
+                    "config": {
+                        "handler": "SyncFileTask",
+                        "src": "foo.json",
+                        "destdir": "build/proto",
+                        "environment": { "version": "1.0" }
+                    }
+                }
             }
         }
     }
